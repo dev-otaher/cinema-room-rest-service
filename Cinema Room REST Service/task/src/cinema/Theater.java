@@ -1,42 +1,47 @@
 package cinema;
 
 public class Theater {
-    private int total_rows = 9;
-    private int total_columns = 9;
-    private Seat[] available_seats;
+    private int totalRows = 9;
+    private int totalColumns = 9;
+    private Seat[] availableSeats;
 
     public Theater() {
-        available_seats = new Seat[total_rows * total_columns];
-        int columnIndex = 0;
-        for (int i = 0; i < available_seats.length; i++) {
-            if (i % 9 == 0) {
-                columnIndex++;
-            }
-            available_seats[i] = new Seat(i % 9 + 1, columnIndex);
+        availableSeats = new Seat[totalRows * totalColumns];
+        for (int i = 0; i < availableSeats.length; i++) {
+            int column = (i % totalColumns) + 1;
+            int row = (i - column + 1) / totalColumns + 1;
+            availableSeats[i] = new Seat(row, column);
         }
     }
 
-    public int getTotal_rows() {
-        return total_rows;
+    public int getTotalRows() {
+        return totalRows;
     }
 
-    public void setTotal_rows(int total_rows) {
-        this.total_rows = total_rows;
+    public void setTotalRows(int totalRows) {
+        this.totalRows = totalRows;
     }
 
-    public int getTotal_columns() {
-        return total_columns;
+    public int getTotalColumns() {
+        return totalColumns;
     }
 
-    public void setTotal_columns(int total_columns) {
-        this.total_columns = total_columns;
+    public void setTotalColumns(int totalColumns) {
+        this.totalColumns = totalColumns;
     }
 
-    public Seat[] getAvailable_seats() {
-        return available_seats;
+    public Seat[] getAvailableSeats() {
+        return availableSeats;
     }
 
-    public void setAvailable_seats(Seat[] available_seats) {
-        this.available_seats = available_seats;
+    public void setAvailableSeats(Seat[] availableSeats) {
+        this.availableSeats = availableSeats;
+    }
+
+    public Seat purchaseSeat(Seat seat) {
+        int seatIndex = (seat.getRow() - 1) * totalColumns + seat.getColumn() - 1;
+        Seat chosen = availableSeats[seatIndex];
+        availableSeats[seatIndex] = null;
+        return chosen;
     }
 }
