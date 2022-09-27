@@ -1,17 +1,35 @@
 package cinema;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.util.UUID;
+
 public class Seat {
+    @JsonIgnore
+    private UUID token;
     private int row;
     private int column;
     private int price;
+    @JsonIgnore
+    private boolean purchased;
 
     public Seat() {
     }
 
     public Seat(int row, int column) {
+        token = UUID.randomUUID();
         this.row = row;
         this.column = column;
-        this.price = generatePrice();
+        price = generatePrice();
+        purchased = false;
+    }
+
+    public UUID getToken() {
+        return token;
+    }
+
+    public void setToken(UUID token) {
+        this.token = token;
     }
 
     private int generatePrice() {
@@ -46,4 +64,11 @@ public class Seat {
         this.price = price;
     }
 
+    public boolean isPurchased() {
+        return purchased;
+    }
+
+    public void setPurchased(boolean purchased) {
+        this.purchased = purchased;
+    }
 }

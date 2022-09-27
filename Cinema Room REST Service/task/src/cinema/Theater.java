@@ -1,5 +1,7 @@
 package cinema;
 
+import java.util.UUID;
+
 public class Theater {
     private int totalRows = 9;
     private int totalColumns = 9;
@@ -38,10 +40,25 @@ public class Theater {
         this.availableSeats = availableSeats;
     }
 
-    public Seat purchaseSeat(Seat seat) {
+    public Seat getSeat(Seat seat) {
         int seatIndex = (seat.getRow() - 1) * totalColumns + seat.getColumn() - 1;
-        Seat chosen = availableSeats[seatIndex];
-        availableSeats[seatIndex] = null;
-        return chosen;
+        return availableSeats[seatIndex];
+    }
+
+    public Seat getSeat(UUID token) {
+        for (Seat seat : availableSeats) {
+            if (seat.getToken().equals(token)) {
+                return seat;
+            }
+        }
+        return null;
+    }
+
+    public void purchaseTicket(Seat seat) {
+        getSeat(seat).setPurchased(true);
+    }
+
+    public void returnTicket(UUID token) {
+        getSeat(token).setPurchased(false);
     }
 }
