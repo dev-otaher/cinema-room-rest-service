@@ -2,10 +2,7 @@ package cinema;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,8 +13,12 @@ public class TheaterController {
     private final Theater theater = new Theater();
 
     @GetMapping("/seats")
-    public Theater getTheater() {
-        return theater;
+    public ResponseEntity getSeats() {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("total_rows", theater.getTotalRows());
+        response.put("total_columns", theater.getTotalColumns());
+        response.put("available_seats", theater.getAvailableSeats());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/purchase")
@@ -27,11 +28,11 @@ public class TheaterController {
                     HttpStatus.BAD_REQUEST);
         }
         Seat chosenSeat = theater.getSeat(seat);
-        if (chosenSeat.isPurchased()) {
+        if (chosenSeat == null || chosenSeat.isPurchased()) {
             return new ResponseEntity<>(Map.of("error", "The ticket has been already purchased!"),
                     HttpStatus.BAD_REQUEST);
         }
-        theater.purchaseTicket(seat);
+        theater.purchaseSeat(chosenSeat);
         Map<String, Object> response = new LinkedHashMap<>(Map.of(
                 "token", chosenSeat.getToken(),
                 "ticket", chosenSeat
@@ -51,16 +52,27 @@ public class TheaterController {
     @PostMapping("/return")
     public ResponseEntity returnTicket(@RequestBody Map<String, String> map) {
         UUID token = UUID.fromString(map.get("token"));
-        Seat seat = theater.getSeat(token);
+        Seat seat = theater.getPurchasedSeat(token);
         if (seat == null) {
             return new ResponseEntity<>(Map.of("error", "Wrong token!"),
                     HttpStatus.BAD_REQUEST);
         }
-        theater.returnTicket(token);
+        theater.returnSeat(seat);
         Map<String, Object> response = new LinkedHashMap<>(Map.of(
                 "returned_ticket", seat
         ));
-
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/stats")
+    public ResponseEntity getStats(@RequestParam(required = false) String password) {
+        if (password != null && password.equals("super_secret")) {
+            Map<String, Integer> response = new LinkedHashMap<>();
+            response.put("current_income", theater.getCurrentIncome());
+            response.put("number_of_available_seats", theater.getAvailableSeats().size());
+            response.put("number_of_purchased_tickets", theater.getPurchasedSeats().size());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(Map.of("error", "The password is wrong!"), HttpStatus.UNAUTHORIZED);
     }
 }
